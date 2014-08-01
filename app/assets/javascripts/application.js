@@ -1,6 +1,7 @@
 // Gemas y vendored
 //= require jquery
-//= require jquery-ui
+// TODO revisar qué componentes necesito específicamente
+//= require jquery.ui.all
 //= require jquery_ujs
 //= require jquery.nested-fields
 //= require tinymce-jquery
@@ -14,4 +15,10 @@
 //
 // Aplicación
 //= require_tree ./jquery
-//= require_tree ./comunes
+//
+//= require comunes/busquedas
+//= require comunes/equipos
+//= require comunes/formularios
+//= require comunes/layout
+//= require comunes/perfiles
+//= require comunes/permisos

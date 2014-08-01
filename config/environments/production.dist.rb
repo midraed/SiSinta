@@ -5,6 +5,8 @@ SiSINTA::Application.configure do
   # Code is not reloaded between requests
   config.cache_classes = true
 
+  config.eager_load = true
+
   # Full error reports are disabled and caching is turned on
   config.consider_all_requests_local       = false
   config.action_controller.perform_caching = true
@@ -46,6 +48,7 @@ SiSINTA::Application.configure do
 
   # Use a different cache store in production
   # config.cache_store = :mem_cache_store
+  config.cache_store = :libmemcached_store
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server
   # config.action_controller.asset_host = "http://assets.example.com"
@@ -72,12 +75,7 @@ SiSINTA::Application.configure do
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
 
-  # Log the query plan for queries taking more than this (works
-  # with SQLite, MySQL, and PostgreSQL)
-  # config.active_record.auto_explain_threshold_in_seconds = 0.5
-
   # Cómo guardar los archivos adjuntos. Usa la interpolación de Paperclip y el
   # símbolo :url que está definido en el modelo Adjunto
   config.adjunto_path = '/var/tmp/sisinta-prod:url'
-
 end
