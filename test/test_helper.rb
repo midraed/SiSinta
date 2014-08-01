@@ -3,6 +3,7 @@ ENV["RAILS_ENV"] = "test"
 require File.expand_path('../../config/environment', __FILE__)
 require 'rails/test_help'
 require 'capybara/rails'
+require "minitest/rails"
 require 'minitest/mock'
 
 # Helpers para los unit tests
@@ -21,6 +22,16 @@ class ActionController::TestCase
     @request.env["devise.mapping"] = Devise.mappings[:usuario]
     sign_in @usuario
     return @usuario
+  end
+
+  # FIXME rediseñar los tests usando esto
+  def autorizar
+    @ability = Object.new
+    @ability.extend(CanCan::Ability)
+    @ability.can :manage, :all
+    @controller.stub(:current_ability, @ability) do
+      yield
+    end
   end
 
   def json

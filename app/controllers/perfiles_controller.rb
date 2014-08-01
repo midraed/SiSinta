@@ -102,7 +102,9 @@ class PerfilesController < AutorizadoController
     respond_with @perfiles, location: nil do |format|
       format.csv do
         send_data CSVSerializer.new(@perfiles).as_csv(
-          headers: true, checks: current_usuario.try(:checks_csv_perfiles)
+          # FIXME No permite exportar a usuarios anónimos
+          headers: true, checks: current_usuario.try(:checks_csv_perfiles),
+          base: Perfil
         ), filename: archivo_csv
       end
     end
@@ -164,7 +166,9 @@ class PerfilesController < AutorizadoController
     # Ordena los resultados según las columnas de la lista. Si son columnas de
     # texto, las normaliza a lowercase.
     def ordenar
-      @perfiles = @perfiles.joins(:ubicacion, :serie)
+      # Usar outer join con serie para que no excluya los perfiles sin serie
+      @perfiles = @perfiles.joins{ubicacion}.joins{serie.outer}
+
       case @metodo = metodo_de_ordenamiento
         when 'ubicacion'
           @metodo = 'lower(ubicaciones.descripcion)'

@@ -1,7 +1,11 @@
-# -*- encoding : utf-8 -*-
+# encoding: utf-8
 require File.expand_path('../boot', __FILE__)
 
-require 'rails/all'
+require "active_record/railtie"
+require "action_controller/railtie"
+require "action_mailer/railtie"
+require "active_resource/railtie"
+require "sprockets/railtie"
 
 # PostGIS adapter includes a special railtie that provides support for PostGIS databases
 # in ActiveRecord’s rake tasks. This railtie is required in order to run, e.g., rake test. To
@@ -55,9 +59,12 @@ module SiSINTA
     config.assets.enabled = true
 
     # Version of your assets, change this if you want to expire all your assets
-    config.assets.version = '0.2.11'
+    config.assets.version = '0.3.3'
 
     # Traduzco el path
     config.assets.prefix = "/estaticos"
+
+    # Manejo de versiones en la aplicación
+    is_versioned
   end
 end

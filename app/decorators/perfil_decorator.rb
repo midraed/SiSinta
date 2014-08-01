@@ -10,6 +10,7 @@ class PerfilDecorator < ApplicationDecorator
   decorates_association :usuario
   decorates_association :humedad
   decorates_association :capacidad
+  decorates_association :horizontes
 
   def fecha
     if source.fecha?
@@ -42,18 +43,17 @@ class PerfilDecorator < ApplicationDecorator
     source.humedad       ||= Humedad.new
     source.pedregosidad  ||= Pedregosidad.new
     source.erosion       ||= Erosion.new
-    source.horizontes.each do |h|
-      h.color_seco    || h.build_color_seco
-      h.color_humedo  || h.build_color_humedo
-      h.limite        || h.build_limite
-      h.consistencia  || h.build_consistencia
-      h.estructura    || h.build_estructura
-      h.analitico     || h.build_analitico
+    horizontes.each do |h|
+      h.preparar
     end
     self
   end
 
   def numero
     source.numero || source.to_param
+  end
+
+  def link_a_serie
+    h.link_to nombre, serie, class: 'perfil_nombre' if serie.present?
   end
 end

@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.2.13'
+gem 'rails', '3.2.15'
 
 ## DB
 gem 'pg'
@@ -11,7 +11,7 @@ gem 'devise'
 gem 'devise-i18n'
 gem 'cancan'
 gem 'param_protected'
-gem 'rolify'
+gem 'rolify', '~> 3.2.0'
 
 ## Presentación
 gem 'dynamic_form'
@@ -29,7 +29,7 @@ gem 'paperclip'
 gem 'active_hash'
 gem 'rocket_tag', git: 'https://github.com/bradphelan/rocket_tag.git'
 gem 'attribute_normalizer'
-gem 'inflections'
+gem 'inflections', '0.0.5', require: 'inflections/es'
 gem 'active_model_serializers'
 
 ## GIS
@@ -44,22 +44,27 @@ gem 'has_scope'
 gem 'browser_detect'
 
 ## Assets
+gem 'tinymce-rails'
 group :assets do
-  gem 'sass-rails', "  ~> 3.2.3"
-  gem 'coffee-rails', "~> 3.2.1"
+  gem 'sass-rails', '~> 3.2.3'
+  gem 'coffee-rails', '~> 3.2.1'
   gem 'therubyracer'
   gem 'uglifier'
-  gem 'tinymce-rails'
   gem 'multiselectjs_rails'
   gem 'jquery-rails'
+  gem 'jquery-ui-rails'
   gem 'select2-rails'
 end
 
 ## Server
 gem 'thin'
-gem 'rails3_libmemcached_store'
+gem 'libmemcached_store'
 
 ## Desarrollo
+gem 'minitest-rails'
+gem 'version'
+gem 'awesome_print'
+
 group :test, :development do
   gem 'pry-rails'
   gem 'hirb'
@@ -67,13 +72,12 @@ end
 
 group :development do
   gem 'bullet'
-  gem 'capistrano'
+  gem 'capistrano', '< 3'
   gem 'capistrano-rbenv'
 end
 
 group :test do
   gem 'turn'
-  gem 'minitest'
   gem 'factory_girl_rails'
   gem 'capybara', '~> 2.0.3'
   gem 'capybara-webkit'
