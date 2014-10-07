@@ -42,5 +42,12 @@ FactoryGirl.define do
         perfil.horizontes << create(:horizonte)
       end
     end
+
+    # Sólo los atributos y asociaciones que pasamos al GeoJSON
+    factory :perfil_para_geojson do
+      publico true
+      serie
+      association :ubicacion, :con_coordenadas
+    end
   end
 end

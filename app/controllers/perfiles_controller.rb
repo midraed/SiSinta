@@ -1,8 +1,10 @@
 # encoding: utf-8
 class PerfilesController < AutorizadoController
-  autocomplete :reconocedores, :name, full: true, class_name: 'RocketTag::Tag',
+  autocomplete :reconocedores, :name, full: true,
+    class_name: 'ActsAsTaggableOn::Tag',
     scopes: [ { joins: :taggings }, { where: "taggings.context = 'reconocedores'"} ]
-  autocomplete :etiquetas, :name, full: true, class_name: 'RocketTag::Tag',
+  autocomplete :etiquetas, :name, full: true,
+    class_name: 'ActsAsTaggableOn::Tag',
     scopes: [ { joins: :taggings }, { where: "taggings.context = 'etiquetas'"} ]
 
   has_scope :pagina, default: 1, unless: :geojson?
@@ -26,6 +28,8 @@ class PerfilesController < AutorizadoController
     o.before_filter :preparar
     o.before_filter :ordenar
   end
+
+  before_filter :seleccionar_ficha, only: [:edit, :new, :show]
 
   before_filter :buscar_perfiles_o_exportar,    only: [:procesar]
   before_filter :cargar_perfiles_seleccionados, only: [:exportar, :procesar]
@@ -60,7 +64,7 @@ class PerfilesController < AutorizadoController
     respond_with @perfil = @perfil.decorate
   end
 
-  # Cada usuario es propietario y "miembro" de los perfiles que crea
+  # Cada usuario es propietario y 'miembro' de los perfiles que crea
   def create
     @perfil.usuario = current_usuario
 
@@ -77,7 +81,7 @@ class PerfilesController < AutorizadoController
 
   def update
     # Si falla, responders lo redirige a edit
-    opciones = if @perfil.update_attributes(params[:perfil])
+    opciones = if @perfil.update_attributes(perfil_params)
       { location: perfil_o_analiticos }
     else
       { }
@@ -145,7 +149,7 @@ class PerfilesController < AutorizadoController
   end
 
   def update_analiticos
-    @perfil.update_attributes(params[:perfil])
+    @perfil.update_attributes(perfil_params)
     @perfil = @perfil.decorate
     respond_with @perfil, location: perfil_analiticos_path(@perfil) do |format|
       if @perfil.errors.any?
@@ -155,6 +159,43 @@ class PerfilesController < AutorizadoController
   end
 
   protected
+
+    def perfil_params
+      params.require(:perfil).permit(
+        :modal, :fecha, :numero, :vegetacion_o_cultivos, :material_original,
+        :drenaje_id, :relieve_id, :anegamiento_id, :posicion_id, :pendiente_id,
+        :cobertura_vegetal, :profundidad_napa, :escurrimiento_id, :sal_id,
+        :permeabilidad_id, :uso_de_la_tierra_id, :observaciones, :etiqueta_list,
+        :reconocedor_list, :publico,
+        serie_attributes: %i{ nombre simbolo provincia_id id },
+        ubicacion_attributes: %i{
+          mosaico recorrido aerofoto id descripcion y x srid },
+        fase_attributes: %i{ nombre id },
+        grupo_attributes: %i{ descripcion id },
+        capacidad_attributes: [ :id, :clase_id, subclase_ids: [] ],
+        paisaje_attributes: %i{ tipo forma simbolo id },
+        humedad_attributes: [ :id, :clase_id, subclase_ids: [] ],
+        pedregosidad_attributes: %i{ clase_id subclase_id id },
+        erosion_attributes: %i{ subclase_id clase_id id },
+        horizontes_attributes: [
+          :tipo, :profundidad_superior, :profundidad_inferior, :textura_id,
+          :ph, :co3, :concreciones, :barnices, :moteados, :humedad, :raices,
+          :formaciones_especiales, :_destroy, :id,
+          limite_attributes: %i{ tipo_id forma_id id },
+          color_seco_attributes: %i{ hvc },
+          color_humedo_attributes: %i{ hvc },
+          estructura_attributes: %i{ tipo_id clase_id grado_id id },
+          consistencia_attributes: %i{ en_seco_id en_humedo_id plasticidad_id adhesividad_id id },
+        ],
+        analiticos_attributes: %i{
+          registro profundidad_muestra materia_organica_c materia_organica_n
+          materia_organica_cn arcilla limo_2_20 limo_2_50 arena_muy_fina
+          arena_fina arena_media arena_gruesa arena_muy_gruesa ca_co3 humedad
+          agua_3_atm agua_15_atm agua_util ph_pasta ph_h2o ph_kcl
+          resistencia_pasta conductividad base_ca base_mg base_k base_na s h t
+          saturacion_t saturacion_s_h densidad_aparente id }
+      )
+    end
 
     # Prepara el scope para la lista de perfiles
     def preparar
@@ -183,11 +224,18 @@ class PerfilesController < AutorizadoController
       @perfiles = @perfiles.reorder("#{@metodo} #{direccion_de_ordenamiento}")
     end
 
-    # Determina si el usuario terminó de editar el perfil o va a seguir con los
-    # datos analíticos
-    # TODO Revisar que envíe al edit
+    # Determina a dónde redirigir de acuerdo al submit del formulario.
     def perfil_o_analiticos
-      params[:analiticos].present? ? editar_analiticos_perfil_path(@perfil) : @perfil
+      case params[:commit]
+      when t('helpers.submit.perfil.analiticos')
+        editar_analiticos_perfil_path(@perfil)
+      when t('helpers.submit.perfil.cambiar_ficha')
+        # Un filter carga @ficha con este valor en la siguiente solicitud
+        session[:ficha] = Ficha.find_by_valor(params[:ficha]).try(:valor)
+        edit_perfil_path(@perfil)
+      else
+        @perfil
+      end
     end
 
     # Revisa el input del usuario para los métodos de ordenamiento. Ordena según
@@ -247,5 +295,9 @@ class PerfilesController < AutorizadoController
 
     def marcado_para_remover?(hash)
       hash[:_destroy].present? or hash[:anular].present?
+    end
+
+    def seleccionar_ficha
+      @ficha = session.delete(:ficha) || current_usuario.ficha
     end
 end

@@ -2,6 +2,10 @@
 
   = f.error_messages
 
+  .seleccionar-ficha
+    = f.submit t('helpers.submit.perfil.cambiar_ficha')
+    = select_tag :ficha, options_for_select(lista_de_fichas, current_usuario.ficha)
+
   = field_set_tag 'Ficha de descripción edafológica', class: 'celeste_oscuro span-23 last' do
 
     .span-23.last
@@ -11,13 +15,19 @@
         = f.object.ayuda :modal
       #serie
         = f.fields_for :serie do |fs|
-          .span-13.campo
+          .span-17.campo.last
             .span-2= fs.label :nombre
-            .span-11.last= fs.autocomplete_field :nombre,
+            .span-15.last= fs.autocomplete_field :nombre,
               autocompletar_nombre_series_path,
               update_elements: { simbolo: '#perfil_serie_attributes_simbolo' },
               disabled: bloqueado
             = f.object.ayuda :nombre
+
+          .span-13.prepend-4.campo.last
+            .span-2= fs.label :provincia
+            .span-11.last= fs.collection_select :provincia_id, Provincia.all, :id, :nombre,
+              { prompt: true }, disabled: bloqueado, required: true
+            = f.object.ayuda :provincia
           .span-4.prepend-media.last.campo
             .span-2= fs.label :simbolo
             .span-2.last= fs.autocomplete_field :simbolo,
@@ -35,4 +45,4 @@
 
     .acciones.span-8.last
       .span-4= f.submit unless bloqueado
-      .span-4.last= f.submit('Datos Analíticos', name: 'analiticos') unless bloqueado
+      .span-4.last= f.submit t('helpers.submit.perfil.analiticos') unless bloqueado
