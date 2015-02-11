@@ -1,16 +1,18 @@
-source 'http://rubygems.org'
+source 'https://rubygems.org'
+source 'https://rails-assets.org'
 
-gem 'rails', '4.0.8'
+gem 'rails', '4.0.12'
 
 ## DB
 gem 'pg'
-gem 'yaml_db'
+# Rama con un parche para que las join tables salgan ordenadas
+gem 'yaml_db', git: 'https://github.com/mauriciopasquier/yaml_db.git', branch: 'order-join-tables'
 
 ## Aut{enticación,orización}, seguridad en general
 gem 'devise'
 gem 'devise-i18n'
 gem 'cancancan'
-gem 'rolify'
+gem 'rolify', '~> 3.4'
 
 ## Presentación
 gem 'dynamic_form'
@@ -19,8 +21,7 @@ gem 'awesome_nested_fields'
 gem 'kaminari'
 gem 'draper'
 gem 'ransack'
-gem 'rails3-jquery-autocomplete',
-  git: 'https://github.com/mauriciopasquier/rails3-jquery-autocomplete.git'
+gem 'rails3-jquery-autocomplete'
 
 ## Modelos
 gem 'paperclip'
@@ -28,7 +29,7 @@ gem 'active_hash'
 gem 'acts-as-taggable-on'
 gem 'attribute_normalizer'
 gem 'inflections', '0.0.5', require: 'inflections/es'
-gem 'active_model_serializers'
+gem 'active_model_serializers', '~> 0.8.0'
 gem 'squeel', git: 'https://github.com/activerecord-hackery/squeel.git'
 
 ## GIS
@@ -54,10 +55,13 @@ gem 'multiselectjs_rails', git: 'https://github.com/mauriciopasquier/multiselect
 gem 'jquery-rails'
 gem 'jquery-ui-rails'
 gem 'select2-rails'
+gem 'leaflet-rails'
+gem 'rails-assets-leaflet.markercluster'
 
 ## Server
 gem 'thin'
-gem 'libmemcached_store'
+# TODO revisar configuración de compresión
+gem 'dalli'
 
 ## Desarrollo
 gem 'minitest-rails'
@@ -73,12 +77,11 @@ end
 group :development do
   gem 'bullet'
   gem 'better_errors'
-  gem 'capistrano', '< 3'
+  gem 'capistrano-rails'
   gem 'capistrano-rbenv'
 end
 
 group :test do
-  gem 'turn'
   gem 'database_cleaner'
   gem 'minitest-rails-capybara'
   gem 'selenium-webdriver'

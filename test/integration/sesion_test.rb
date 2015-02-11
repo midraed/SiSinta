@@ -3,31 +3,40 @@ require './test/test_helper'
 
 feature 'Sesión de usuario' do
   background do
-    visit '/'
-    click_link 'Entrar'
-    assert_equal new_usuario_session_path, current_path
-    assert page.has_css?('#usuario_email')
-    assert page.has_css?('#usuario_password')
+    @usuario = create(:usuario)
+  end
 
-    u = create(:usuario)
+  scenario 'Puede loguearse exitosamente' do
+    visit root_path
+    click_link 'Entrar'
+
+    current_path.must_equal new_usuario_session_path
+
+    page.must_have_selector '#usuario_email'
+    page.must_have_selector '#usuario_password'
 
     within 'form' do
-      fill_in Usuario.human_attribute_name('email'),    with: u.email
-      fill_in Usuario.human_attribute_name('password'), with: u.password
+      fill_in Usuario.human_attribute_name('email'),    with: @usuario.email
+      fill_in Usuario.human_attribute_name('password'), with: @usuario.password
 
       click_button 'Entrar'
     end
-  end
-
-  scenario 'Después de loguearse avisa y va al root' do
-    current_path.must_equal root_path
-    page.must_have_selector '#flash_notice.mensaje', text: I18n.t('devise.sessions.signed_in')
-  end
-
-  scenario "Puede salir de la sesión" do
-    click_link 'Salir'
 
     current_path.must_equal root_path
-    page.must_have_selector '#flash_notice.mensaje', text: I18n.t('devise.sessions.signed_out')
+    page.must_have_selector '.mensaje', text: I18n.t('devise.sessions.signed_in')
+  end
+
+  feature 'Estando logueado' do
+    background do
+      loguear @usuario
+    end
+
+    scenario 'Puede salir de la sesión' do
+      visit root_path
+      click_link 'Salir'
+
+      current_path.must_equal root_path
+      page.must_have_selector '#flash_notice.mensaje', text: I18n.t('devise.sessions.signed_out')
+    end
   end
 end

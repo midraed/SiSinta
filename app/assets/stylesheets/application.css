@@ -6,10 +6,13 @@
  *= require_self
  *= require blueprint
  *= require jquery
- *= require jquery.ui.all
+ *= require jquery-ui
  *= require select2
  *= require ui.multiselect
  *= require jquery-multiselect
+ *= require leaflet
+ *= require leaflet.markercluster/dist/MarkerCluster.Default
+ *= require leaflet.markercluster/dist/MarkerCluster
  *
  * Explicitar qué cargamos
  *= require comunes/adjuntos

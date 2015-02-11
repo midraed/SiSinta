@@ -13,7 +13,7 @@ class PerfilesController < AutorizadoController
 
   load_and_authorize_resource
 
-  respond_to :geojson, only: :index
+  respond_to :geojson, only: [:index, :show]
   respond_to :csv, only: [ :index, :procesar ]
 
   # acciones que funcionan anónimamente
@@ -28,6 +28,8 @@ class PerfilesController < AutorizadoController
     o.before_filter :preparar
     o.before_filter :ordenar
   end
+
+  before_filter :seleccionar_ficha, only: [:edit, :new, :show]
 
   before_filter :buscar_perfiles_o_exportar,    only: [:procesar]
   before_filter :cargar_perfiles_seleccionados, only: [:exportar, :procesar]
@@ -51,7 +53,16 @@ class PerfilesController < AutorizadoController
   end
 
   def show
-    respond_with @perfil = @perfil.decorate
+    respond_with @perfil = @perfil.decorate do |format|
+      # Serializar como una colección de un sólo miembro
+      format.geojson do
+        if @perfil.geolocalizado?
+          render json: [@perfil], serializer: GeojsonCollectionSerializer
+        else
+          render json: true, status: :no_content
+        end
+      end
+    end
   end
 
   def new
@@ -62,7 +73,7 @@ class PerfilesController < AutorizadoController
     respond_with @perfil = @perfil.decorate
   end
 
-  # Cada usuario es propietario y "miembro" de los perfiles que crea
+  # Cada usuario es propietario y 'miembro' de los perfiles que crea
   def create
     @perfil.usuario = current_usuario
 
@@ -165,7 +176,7 @@ class PerfilesController < AutorizadoController
         :cobertura_vegetal, :profundidad_napa, :escurrimiento_id, :sal_id,
         :permeabilidad_id, :uso_de_la_tierra_id, :observaciones, :etiqueta_list,
         :reconocedor_list, :publico,
-        serie_attributes: %i{ nombre simbolo id },
+        serie_attributes: %i{ nombre simbolo provincia_id id },
         ubicacion_attributes: %i{
           mosaico recorrido aerofoto id descripcion y x srid },
         fase_attributes: %i{ nombre id },
@@ -222,11 +233,18 @@ class PerfilesController < AutorizadoController
       @perfiles = @perfiles.reorder("#{@metodo} #{direccion_de_ordenamiento}")
     end
 
-    # Determina si el usuario terminó de editar el perfil o va a seguir con los
-    # datos analíticos
-    # TODO Revisar que envíe al edit
+    # Determina a dónde redirigir de acuerdo al submit del formulario.
     def perfil_o_analiticos
-      params[:analiticos].present? ? editar_analiticos_perfil_path(@perfil) : @perfil
+      case params[:commit]
+      when t('helpers.submit.perfil.analiticos')
+        editar_analiticos_perfil_path(@perfil)
+      when t('helpers.submit.perfil.cambiar_ficha')
+        # Un filter carga @ficha con este valor en la siguiente solicitud
+        session[:ficha] = Ficha.find_by_valor(params[:ficha]).try(:valor)
+        edit_perfil_path(@perfil)
+      else
+        @perfil
+      end
     end
 
     # Revisa el input del usuario para los métodos de ordenamiento. Ordena según
@@ -286,5 +304,9 @@ class PerfilesController < AutorizadoController
 
     def marcado_para_remover?(hash)
       hash[:_destroy].present? or hash[:anular].present?
+    end
+
+    def seleccionar_ficha
+      @ficha = session.delete(:ficha) || current_usuario.ficha
     end
 end

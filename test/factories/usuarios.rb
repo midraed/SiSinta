@@ -3,9 +3,9 @@ FactoryGirl.define do
   factory :usuario do
     nombre { generate :cadena_unica }
     email
-    password "algún password inolvidable"
+    password 'algún password inolvidable'
 
-    ignore { rol nil }
+    transient { rol nil }
     after(:build) do |usuario, params|
       usuario.grant(params.rol) if params.rol
     end

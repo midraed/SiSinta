@@ -25,6 +25,10 @@ form.completa {
   .coordenada-x { @include coordenada(0px);
                   padding-right: 0; }
 
+  #mapa {
+    height: 300px;
+    width: inherit;
+  }
 }
 
 // TODO acotar a la vista específica
@@ -72,5 +76,24 @@ form.completa {
   #perfiles_asociados {
     .borrar { display: none; }
     .acciones { display: 3%; }
+  }
+}
+
+.seleccionar-ficha {
+  float: right;
+  width: 50%;
+
+  select, input {
+    display: inline;
+    float: right;
+  }
+
+  select {
+    margin-right: 2em;
+    width: 70%;
+  }
+
+  input {
+    width: 20%;
   }
 }
